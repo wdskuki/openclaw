@@ -2,12 +2,14 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-export async function readJsonFile<T>(filePath: string): Promise<T | null> {
+export async function readJsonFile<T>(filePath: string): Promise<T | null>;
+export async function readJsonFile<T>(filePath: string, defaultValue: T): Promise<T>;
+export async function readJsonFile<T>(filePath: string, defaultValue?: T): Promise<T | null> {
   try {
     const raw = await fs.readFile(filePath, "utf8");
     return JSON.parse(raw) as T;
   } catch {
-    return null;
+    return defaultValue ?? null;
   }
 }
 
@@ -52,6 +54,7 @@ export async function writeTextAtomic(
       // best-effort; ignore on platforms without chmod
     }
   } finally {
+    // Clean up temp file; ignore errors (file may not exist if write failed early)
     await fs.rm(tmp, { force: true }).catch(() => undefined);
   }
 }

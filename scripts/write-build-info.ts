@@ -8,6 +8,11 @@ const distDir = path.join(rootDir, "dist");
 const pkgPath = path.join(rootDir, "package.json");
 
 const readPackageVersion = () => {
+  // Allow override via environment variable for CI/CD builds
+  const envVersion = process.env.OPENCLAW_BUILD_VERSION?.trim();
+  if (envVersion) {
+    return envVersion;
+  }
   try {
     const raw = fs.readFileSync(pkgPath, "utf8");
     const parsed = JSON.parse(raw) as { version?: string };

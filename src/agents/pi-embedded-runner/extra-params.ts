@@ -350,7 +350,7 @@ export function applyExtraParamsToAgent(
     agent.streamFn = createOpenAIDefaultTransportWrapper(agent.streamFn);
   }
   const override =
-    extraParamsOverride && Object.keys(extraParamsOverride).length > 0
+    extraParamsOverride && typeof extraParamsOverride === "object" && !Array.isArray(extraParamsOverride) && Object.keys(extraParamsOverride).length > 0
       ? Object.fromEntries(
           Object.entries(extraParamsOverride).filter(([, value]) => value !== undefined),
         )

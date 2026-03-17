@@ -1,6 +1,12 @@
 import path from "node:path";
-import { CHANNEL_IDS } from "../../channels/registry.js";
+import type { CHANNEL_IDS as ChannelIdsType } from "../../channels/registry.js";
 import { STATE_DIR } from "../../config/paths.js";
+
+// Lazy getter to avoid temporal dead zone issues with circular dependencies
+function getChannelIds(): readonly string[] {
+  const { CHANNEL_IDS } = require("../../channels/registry.js");
+  return CHANNEL_IDS;
+}
 
 export const DEFAULT_SANDBOX_WORKSPACE_ROOT = path.join(STATE_DIR, "sandboxes");
 
@@ -34,7 +40,7 @@ export const DEFAULT_TOOL_DENY = [
   "nodes",
   "cron",
   "gateway",
-  ...CHANNEL_IDS,
+  ...getChannelIds(),
 ] as const;
 
 export const DEFAULT_SANDBOX_BROWSER_IMAGE = "openclaw-sandbox-browser:bookworm-slim";

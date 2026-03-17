@@ -1,6 +1,13 @@
 import crypto from "node:crypto";
-import { CHANNEL_IDS } from "../channels/registry.js";
+import type { CHANNEL_IDS as ChannelIdsType } from "../channels/registry.js";
 import { VERSION } from "../version.js";
+
+// Lazy import to avoid temporal dead zone issues with circular dependencies
+function getChannelIds(): readonly string[] {
+  // Dynamic import to avoid circular dependency issues at module load time
+  const { CHANNEL_IDS } = require("../channels/registry.js");
+  return CHANNEL_IDS;
+}
 import type { ConfigUiHint, ConfigUiHints } from "./schema.hints.js";
 import { applySensitiveHints, buildBaseHints, mapSensitivePaths } from "./schema.hints.js";
 import { applyDerivedTags } from "./schema.tags.js";
@@ -243,7 +250,7 @@ function applyChannelHints(hints: ConfigUiHints, channels: ChannelUiMetadata[]):
 function listHeartbeatTargetChannels(channels: ChannelUiMetadata[]): string[] {
   const seen = new Set<string>();
   const ordered: string[] = [];
-  for (const id of CHANNEL_IDS) {
+  for (const id of getChannelIds()) {
     const normalized = id.trim().toLowerCase();
     if (!normalized || seen.has(normalized)) {
       continue;

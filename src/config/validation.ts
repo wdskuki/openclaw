@@ -1,6 +1,13 @@
 import path from "node:path";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
-import { CHANNEL_IDS, normalizeChatChannelId } from "../channels/registry.js";
+import type { CHANNEL_IDS as ChannelIdsType } from "../channels/registry.js";
+import { normalizeChatChannelId } from "../channels/registry.js";
+
+// Lazy getter to avoid temporal dead zone issues with circular dependencies
+function getChannelIds(): readonly string[] {
+  const { CHANNEL_IDS } = require("../channels/registry.js");
+  return CHANNEL_IDS;
+}
 import {
   normalizePluginsConfig,
   resolveEffectiveEnableState,
@@ -388,7 +395,7 @@ function validateConfigObjectWithPluginsBase(
     return info.normalizedPlugins;
   };
 
-  const allowedChannels = new Set<string>(["defaults", "modelByChannel", ...CHANNEL_IDS]);
+  const allowedChannels = new Set<string>(["defaults", "modelByChannel", ...getChannelIds()]);
 
   if (config.channels && isRecord(config.channels)) {
     for (const key of Object.keys(config.channels)) {
@@ -414,7 +421,7 @@ function validateConfigObjectWithPluginsBase(
   }
 
   const heartbeatChannelIds = new Set<string>();
-  for (const channelId of CHANNEL_IDS) {
+  for (const channelId of getChannelIds()) {
     heartbeatChannelIds.add(channelId.toLowerCase());
   }
 

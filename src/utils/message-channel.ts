@@ -1,9 +1,15 @@
 import type { ChannelId } from "../channels/plugins/types.js";
+import type { CHANNEL_IDS as ChannelIdsType } from "../channels/registry.js";
 import {
-  CHANNEL_IDS,
   listChatChannelAliases,
   normalizeChatChannelId,
 } from "../channels/registry.js";
+
+// Lazy getter to avoid temporal dead zone issues with circular dependencies
+function getChannelIds(): readonly string[] {
+  const { CHANNEL_IDS } = require("../channels/registry.js");
+  return CHANNEL_IDS;
+}
 import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
@@ -93,7 +99,7 @@ const listPluginChannelAliases = (): string[] => {
 };
 
 export const listDeliverableMessageChannels = (): ChannelId[] =>
-  Array.from(new Set([...CHANNEL_IDS, ...listPluginChannelIds()]));
+  Array.from(new Set([...getChannelIds(), ...listPluginChannelIds()]));
 
 export type DeliverableMessageChannel = ChannelId;
 

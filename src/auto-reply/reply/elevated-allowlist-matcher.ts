@@ -1,4 +1,4 @@
-import { CHAT_CHANNEL_ORDER } from "../../channels/registry.js";
+import type { CHAT_CHANNEL_ORDER as ChatChannelOrderType } from "../../channels/registry.js";
 import { normalizeAtHashSlug } from "../../shared/string-normalization.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../../utils/message-channel.js";
 
@@ -13,14 +13,21 @@ const EXPLICIT_ELEVATED_ALLOW_FIELDS = new Set<ExplicitElevatedAllowField>([
   "tag",
 ]);
 
-const SENDER_PREFIXES = [
-  ...CHAT_CHANNEL_ORDER,
-  INTERNAL_MESSAGE_CHANNEL,
-  "user",
-  "group",
-  "channel",
-];
-const SENDER_PREFIX_RE = new RegExp(`^(${SENDER_PREFIXES.join("|")}):`, "i");
+// Lazy getter to avoid temporal dead zone issues with circular dependencies
+function getSenderPrefixes(): string[] {
+  const { CHAT_CHANNEL_ORDER } = require("../../channels/registry.js");
+  return [
+    ...CHAT_CHANNEL_ORDER,
+    INTERNAL_MESSAGE_CHANNEL,
+    "user",
+    "group",
+    "channel",
+  ];
+}
+
+function getSenderPrefixRegex(): RegExp {
+  return new RegExp(`^(${getSenderPrefixes().join("|")}):`, "i");
+}
 
 export type AllowFromFormatter = (values: string[]) => string[];
 
@@ -29,7 +36,7 @@ export function stripSenderPrefix(value?: string): string {
     return "";
   }
   const trimmed = value.trim();
-  return trimmed.replace(SENDER_PREFIX_RE, "");
+  return trimmed.replace(getSenderPrefixRegex(), "");
 }
 
 export function parseExplicitElevatedAllowEntry(

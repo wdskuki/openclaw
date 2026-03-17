@@ -550,7 +550,10 @@ export function normalizeProviders(params: {
       } else {
         const fromEnv = resolveEnvApiKeyVarName(normalizedKey, env);
         const apiKey = fromEnv ?? profileApiKey?.apiKey;
-        if (apiKey?.trim()) {
+        // Skip setting apiKey for google-vertex when it's the "<authenticated>" marker.
+        // google-vertex uses Application Default Credentials (ADC), not API keys.
+        // Passing "<authenticated>" as apiKey causes @google/genai to treat it as a real API key.
+        if (apiKey?.trim() && !(normalizedKey === "google-vertex" && apiKey === "<authenticated>")) {
           if (profileApiKey && profileApiKey.source !== "plaintext") {
             params.secretRefManagedProviders?.add(normalizedKey);
           }

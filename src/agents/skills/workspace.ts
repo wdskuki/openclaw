@@ -214,6 +214,12 @@ function resolveContainedSkillPath(params: {
   // Managed skills are installed to a well-known location and should not be subject
   // to path escaping checks that may fail due to symlink resolution differences (e.g., WSL)
   if (params.source === "openclaw-managed") {
+    skillsLogger.debug("Exempting managed skill from path escaping check", {
+      source: params.source,
+      rootDir: params.rootDir,
+      candidatePath: params.candidatePath,
+      candidateRealPath,
+    });
     return candidateRealPath;
   }
   warnEscapedSkillPath({

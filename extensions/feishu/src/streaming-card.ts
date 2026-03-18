@@ -326,6 +326,8 @@ export class FeishuStreamingSession {
   async close(finalText?: string): Promise<void> {
     // Prevent concurrent close calls and return existing promise if already closing
     // This fixes the race condition where multiple close() calls could execute simultaneously
+    // Note: close() is designed to be safely called multiple times; subsequent calls
+    // will await the same in-flight close promise to prevent race conditions.
     if (!this.state) {
       return;
     }

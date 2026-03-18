@@ -402,9 +402,7 @@ export class FeishuStreamingSession {
   }
 
   private async _doClose(finalText?: string, options?: { note?: string }): Promise<void> {
-    if (!this.state) {
-      return;
-    }
+    // Note: this.state is guaranteed to exist here because close() checks it before calling _doClose
     if (this.flushTimer) {
       clearTimeout(this.flushTimer);
       this.flushTimer = null;
@@ -419,6 +417,9 @@ export class FeishuStreamingSession {
     if (text && text !== this.state.currentText) {
       await this.updateCardContent(text);
       this.state.currentText = text;
+    } else if (finalText) {
+      // Log when finalText is ignored because it doesn't change the displayed content
+      this.log?.(`Final text ignored in close(): content unchanged or empty`);
     }
 
     // Update note with final model/provider info
